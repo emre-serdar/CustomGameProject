@@ -1,10 +1,7 @@
 package cs.binghamton.edu;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
+
 
 public class SpaceWars extends Game {
 
@@ -18,7 +15,7 @@ public class SpaceWars extends Game {
 	public void create() {
 		gameScreen = new GameScreen();
 
-		//When the app begis, setScreen will make the game screen to display it
+		//When the app begins, setScreen will make the game screen to display it
 		setScreen(gameScreen);
 	}
 

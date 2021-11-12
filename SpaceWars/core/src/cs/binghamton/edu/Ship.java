@@ -13,27 +13,41 @@ public class Ship {
     float xPosition, yPosition; //lower left corner
     float width, height;
 
-    //graphics
-    TextureRegion shipTexture, shieldTexture;
+    //laser features
+    float laserWidth, laserHeight;
+    float laserMovementSpeed;
+    float timeBetweenShots;
+    float timeSinceLastShot = 0; //start with zero
 
-    public Ship(float movementSpeed, int shield,  float width, float height, float xCenter, float yCenter, TextureRegion shipTexture, TextureRegion shieldTexture) {
+    //graphics
+    TextureRegion shipTextureRegion, shieldTextureRegion, laserTextureRegion;
+
+
+    public Ship(float movementSpeed, int shield,
+                float width, float height, float xCenter,
+                float yCenter, float laserWidth, float laserHeight,
+                float laserMovementSpeed,
+                TextureRegion shipTextureRegion,
+                TextureRegion shieldTextureRegion,
+                TextureRegion laserTextureRegion) {
         this.movementSpeed = movementSpeed;
         this.shield = shield;
         this.xPosition = xCenter - width/2;
         this.yPosition = yCenter - height/2;
         this.width = width;
         this.height = height;
-        this.shipTexture = shipTexture;
-        this.shieldTexture = shieldTexture;
+        this.shipTextureRegion = shipTextureRegion;
+        this.shieldTextureRegion = shieldTextureRegion;
+        this.laserTextureRegion = laserTextureRegion;
     }
 
     public void draw(Batch batch) {
         //to draw ship
-        batch.draw(shipTexture, xPosition, yPosition, width, height);
+        batch.draw(shipTextureRegion, xPosition, yPosition, width, height);
 
         //to draw shield
         if (shield > 0) { // if ship has at least 1 shield
-            batch.draw(shieldTexture,xPosition,yPosition,width,height);
+            batch.draw(shieldTextureRegion,xPosition,yPosition,width,height);
         }
     }
 }

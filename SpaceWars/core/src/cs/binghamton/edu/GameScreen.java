@@ -11,6 +11,8 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import java.util.LinkedList;
+
 public class GameScreen implements Screen {
 
 
@@ -22,6 +24,7 @@ public class GameScreen implements Screen {
     //graphics
     private SpriteBatch batch;
     private TextureAtlas textureAtlas;
+
 
     //instead of having a single background, an array of texture will contain multiple layers
     private TextureRegion[] backgrounds;
@@ -42,7 +45,8 @@ public class GameScreen implements Screen {
     //game objects
     private Ship playerShip;
     private Ship enemyShip;
-
+    private LinkedList<Laser> playerLaserList; // for lasers
+    private LinkedList<Laser> enemyLaserList;
 
     //GameScreen constructor
     GameScreen(){
@@ -70,6 +74,8 @@ public class GameScreen implements Screen {
         enemyShipTextureRegion = textureAtlas.findRegion("enemyRed5");
         playerShieldTextureRegion = textureAtlas.findRegion("shield3");
         enemyShieldTextureRegion = textureAtlas.findRegion("shield1");
+        //to flip shield
+        enemyShieldTextureRegion.flip(false, true);
         playerLaserTextureRegion = textureAtlas.findRegion("laserGreen05");
         enemyLaserTextureRegion = textureAtlas.findRegion("laserRed03");
 
@@ -80,6 +86,9 @@ public class GameScreen implements Screen {
         enemyShip = new Ship(2,1,10,10,
                 WORLD_WIDTH/2, WORLD_HEIGHT*3/4,
                 enemyShipTextureRegion,enemyShieldTextureRegion);
+
+        playerLaserList = new LinkedList<>();
+        enemyLaserList = new LinkedList<>();
 
         batch = new SpriteBatch();
     }
