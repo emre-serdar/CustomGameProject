@@ -3,7 +3,7 @@ package cs.binghamton.edu;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-public class Ship {
+public abstract class Ship {
 
     //ship features
     float movementSpeed; //world units per sec
@@ -23,10 +23,11 @@ public class Ship {
     TextureRegion shipTextureRegion, shieldTextureRegion, laserTextureRegion;
 
 
-    public Ship(float movementSpeed, int shield,
-                float width, float height, float xCenter,
-                float yCenter, float laserWidth, float laserHeight,
-                float laserMovementSpeed,
+    public Ship(float xCenter, float yCenter,
+                float width, float height,
+                float movementSpeed, int shield,
+                float laserWidth, float laserHeight,
+                float laserMovementSpeed, float timeBetweenShots,
                 TextureRegion shipTextureRegion,
                 TextureRegion shieldTextureRegion,
                 TextureRegion laserTextureRegion) {
@@ -36,9 +37,26 @@ public class Ship {
         this.yPosition = yCenter - height/2;
         this.width = width;
         this.height = height;
+        this.laserWidth = laserWidth;
+        this.laserHeight = laserHeight;
+        this.laserMovementSpeed = laserMovementSpeed;
+        this.timeBetweenShots = timeBetweenShots;
         this.shipTextureRegion = shipTextureRegion;
         this.shieldTextureRegion = shieldTextureRegion;
         this.laserTextureRegion = laserTextureRegion;
+    }
+
+    // to update laser information of a ship
+    public void update(float delta){
+        timeSinceLastShot += delta;
+
+    }
+
+    public abstract Laser[] fireLasers();
+
+    //to avoid ships to fire lasers infinitely at the same time
+    public boolean canFireLaser(){
+        return (timeSinceLastShot-timeBetweenShots >= 0);
     }
 
     public void draw(Batch batch) {
@@ -50,4 +68,6 @@ public class Ship {
             batch.draw(shieldTextureRegion,xPosition,yPosition,width,height);
         }
     }
+
+
 }
