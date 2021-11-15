@@ -46,8 +46,8 @@ public class GameScreen implements Screen {
     private final float TOUCH_MOVEMENT_THRESHOLD =0.5f;
 
     //game objects
-    private Ship playerShip;
-    private Ship enemyShip;
+    private PlayerShip playerShip;
+    private EnemyShip enemyShip;
     private LinkedList<Laser> playerLaserList; // for lasers
     private LinkedList<Laser> enemyLaserList;
 
@@ -91,7 +91,7 @@ public class GameScreen implements Screen {
 
         enemyShip = new EnemyShip(WORLD_WIDTH/2, WORLD_HEIGHT*3/4,
                 10,10,
-                2,1,
+                30,1,
                 0.4f, 4, 40, 0.8f,
                 enemyShipTextureRegion, enemyShieldTextureRegion, enemyLaserTextureRegion
                 );
@@ -114,6 +114,9 @@ public class GameScreen implements Screen {
 
         //getting keyboard and touch input
         getInput(delta);
+
+        //enemy movement;
+        moveEnemies(delta);
 
         playerShip.update(delta);
         enemyShip.update(delta);
@@ -139,7 +142,31 @@ public class GameScreen implements Screen {
 
         batch.end();
     }
+    private void moveEnemies(float delta){
+        //strategy: determine the max distance of enemy ships can move
 
+        //top half of screen
+        float leftBoundary, rightBoundary, upBoundary, downBoundary;
+        leftBoundary = -enemyShip.boundingBox.x;
+        downBoundary = (float)WORLD_HEIGHT/2-enemyShip.boundingBox.y; //half bottom
+        rightBoundary = WORLD_WIDTH - enemyShip.boundingBox.x-enemyShip.boundingBox.width;
+        upBoundary = WORLD_HEIGHT - enemyShip.boundingBox.y - enemyShip.boundingBox.height;
+
+
+        float xMove = enemyShip.getDirectionVector().x * enemyShip.movementSpeed * delta;
+        float yMove = enemyShip.getDirectionVector().y * enemyShip.movementSpeed * delta;
+
+
+        //to avoid ship to exceed boundaries of screen
+        if (xMove > 0) xMove = Math.min(xMove, rightBoundary);
+        else xMove = Math.max(xMove, leftBoundary);
+
+        if (yMove > 0) yMove = Math.min(yMove, upBoundary);
+        else yMove = Math.max(yMove,downBoundary);
+        
+        //move the ship
+        enemyShip.translate(xMove,yMove);
+    }
     private void getInput(float delta){
         //keyboard input
 
@@ -150,7 +177,7 @@ public class GameScreen implements Screen {
         leftBoundary = -playerShip.boundingBox.x;
         downBoundary = -playerShip.boundingBox.y;
         rightBoundary = WORLD_WIDTH - playerShip.boundingBox.x-playerShip.boundingBox.width;
-        upBoundary = WORLD_HEIGHT/2 - playerShip.boundingBox.y - playerShip.boundingBox.height;
+        upBoundary = (float) WORLD_HEIGHT/2 - playerShip.boundingBox.y - playerShip.boundingBox.height;
 
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && rightBoundary > 0) {
             /*

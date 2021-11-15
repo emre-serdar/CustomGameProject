@@ -2,6 +2,8 @@ package cs.binghamton.edu;
 
 import com.badlogic.gdx.Game;
 
+import java.util.Random;
+
 
 public class SpaceWars extends Game {
 
@@ -9,6 +11,8 @@ public class SpaceWars extends Game {
 
 	//creating game screen object
 	GameScreen gameScreen;
+
+	public static Random random = new Random();
 
 
 	@Override
