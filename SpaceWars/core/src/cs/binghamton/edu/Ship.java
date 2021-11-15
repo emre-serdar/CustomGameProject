@@ -62,6 +62,11 @@ public abstract class Ship {
         return (timeSinceLastShot-timeBetweenShots >= 0);
     }
 
+    //to move object with user input
+    public void translate(float xChange, float yChange){
+        boundingBox.setPosition(boundingBox.x+xChange, boundingBox.y+yChange);
+    }
+
     public void draw(Batch batch) {
         //to draw ship
         batch.draw(shipTextureRegion, boundingBox.x, boundingBox.y,

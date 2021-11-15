@@ -1,5 +1,7 @@
 package cs.binghamton.edu;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -83,7 +85,7 @@ public class GameScreen implements Screen {
         //set up game objects
         playerShip = new PlayerShip(WORLD_WIDTH/2, WORLD_HEIGHT/4,
                 10,10,
-                2,3,
+                36,3,
                 0.4f, 4, 45, 0.5f,
                 playerShipTextureRegion, playerShieldTextureRegion, playerLaserTextureRegion);
 
@@ -110,6 +112,9 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         batch.begin();
 
+        //getting keyboard and touch input
+        getInput(delta);
+
         playerShip.update(delta);
         enemyShip.update(delta);
 
@@ -133,6 +138,50 @@ public class GameScreen implements Screen {
         renderExplosions(delta);
 
         batch.end();
+    }
+
+    private void getInput(float delta){
+        //keyboard input
+
+        //strategy: determine the max distance the ship can move
+        //check each key that matters and move accordingly
+
+        float leftBoundary, rightBoundary, upBoundary, downBoundary;
+        leftBoundary = -playerShip.boundingBox.x;
+        downBoundary = -playerShip.boundingBox.y;
+        rightBoundary = WORLD_WIDTH - playerShip.boundingBox.x-playerShip.boundingBox.width;
+        upBoundary = WORLD_HEIGHT/2 - playerShip.boundingBox.y - playerShip.boundingBox.height;
+
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && rightBoundary > 0) {
+            /*
+            float xChange = playerShip.movementSpeed*delta;
+            xChange = Math.min(xChange, rightBoundary); //to avoid object to disappear on screen
+            playerShip.translate(xChange, 0f);
+            */
+
+            //same code with 1 line
+            playerShip.translate(Math.min(playerShip.movementSpeed*delta, rightBoundary), 0f);
+
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.UP) && upBoundary > 0) {
+            playerShip.translate(0f, Math.min(playerShip.movementSpeed*delta, upBoundary));
+
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && leftBoundary < 0) { //since left limit will be a negetavie number
+
+            playerShip.translate(Math.max(-playerShip.movementSpeed*delta, leftBoundary), 0f);
+
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && downBoundary < 0) { //since left limit will be a negative number
+
+            playerShip.translate(0f,Math.max(-playerShip.movementSpeed*delta, downBoundary));
+
+        }
+
+        //touch input or mouse click input
     }
 
     private void detectCollision(){
@@ -232,7 +281,7 @@ public class GameScreen implements Screen {
             laser.draw(batch);
             laser.boundingBox.y -= laser.movementSpeed*delta; //delta = time has been passed
             //if lasers pass the boundary of screen according to y axis
-            if (laser.boundingBox.y + laser.boundingBox.height <0 ){
+            if (laser.boundingBox.y + laser.boundingBox.height  <0 ){
                 iterator.remove();
             }
         }
