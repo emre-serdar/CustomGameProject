@@ -5,11 +5,10 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -44,6 +43,7 @@ public class GameScreen implements Screen {
     //world parameters
     private final int WORLD_WIDTH = 72;
     private final int WORLD_HEIGHT = 128;
+    private final float TOUCH_MOVEMENT_THRESHOLD =0.5f;
 
     //game objects
     private Ship playerShip;
@@ -85,14 +85,14 @@ public class GameScreen implements Screen {
         //set up game objects
         playerShip = new PlayerShip(WORLD_WIDTH/2, WORLD_HEIGHT/4,
                 10,10,
-                36,3,
-                0.4f, 4, 45, 0.5f,
+                48,3,
+                0.4f, 4, 40, 0.5f,
                 playerShipTextureRegion, playerShieldTextureRegion, playerLaserTextureRegion);
 
         enemyShip = new EnemyShip(WORLD_WIDTH/2, WORLD_HEIGHT*3/4,
                 10,10,
                 2,1,
-                0.4f, 4, 45, 0.8f,
+                0.4f, 4, 40, 0.8f,
                 enemyShipTextureRegion, enemyShieldTextureRegion, enemyLaserTextureRegion
                 );
 
@@ -182,6 +182,49 @@ public class GameScreen implements Screen {
         }
 
         //touch input or mouse click input
+        if (Gdx.input.isTouched()) {
+            //get the touching position
+            float xTouchLocation = Gdx.input.getX();
+            float yTouchLocation = Gdx.input.getY();
+
+            //convert to world position
+            Vector2 touchPoint = new Vector2(xTouchLocation,yTouchLocation);
+            touchPoint = viewport.unproject(touchPoint);
+
+            //calculate x and y differences between the ship and user touch point
+            Vector2 playerShipCenter = new Vector2(
+                    playerShip.boundingBox.x+playerShip.boundingBox.width/2,
+                    playerShip.boundingBox.y + playerShip.boundingBox.height/2);
+
+            float touchDistance = touchPoint.dst(playerShipCenter);
+            if (touchDistance > TOUCH_MOVEMENT_THRESHOLD){
+                float xTouchDifference = touchPoint.x - playerShipCenter.x;
+                float yTouchDifference = touchPoint.y - playerShipCenter.y;
+
+                /*
+                    distance = speed * time
+                    distance = playerShip.movementSpeed * deltaTime
+                */
+
+                //scaling the maximum speed of ship
+                float xMove = xTouchDifference/touchDistance * playerShip.movementSpeed * delta;
+                float yMove = yTouchDifference/touchDistance * playerShip.movementSpeed * delta;
+
+                //to avoid ship to exceed boundaries of screen
+                if (xMove > 0) xMove = Math.min(xMove, rightBoundary);
+                else xMove = Math.max(xMove, leftBoundary);
+
+                if (yMove > 0) yMove = Math.min(yMove, upBoundary);
+                else yMove = Math.max(yMove,downBoundary);
+                //move the ship
+                playerShip.translate(xMove,yMove);
+
+            }
+
+        }
+
+
+
     }
 
     private void detectCollision(){
@@ -294,6 +337,8 @@ public class GameScreen implements Screen {
         viewport.update(width,height,true);
         batch.setProjectionMatrix(camera.combined);
     }
+
+
 
     @Override
     public void pause() {
