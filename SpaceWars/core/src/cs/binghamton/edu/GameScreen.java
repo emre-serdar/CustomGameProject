@@ -5,15 +5,17 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ListIterator;
 
 public class GameScreen implements Screen {
@@ -27,6 +29,7 @@ public class GameScreen implements Screen {
     //graphics
     private SpriteBatch batch;
     private TextureAtlas textureAtlas;
+    private Texture explosionTexture;
 
 
     //instead of having a single background, an array of texture will contain multiple layers
@@ -53,6 +56,7 @@ public class GameScreen implements Screen {
     private LinkedList<EnemyShip> enemyShipLists;
     private LinkedList<Laser> playerLaserList; // for lasers
     private LinkedList<Laser> enemyLaserList;
+    private LinkedList<Explosion> explosionList;
 
     //GameScreen constructor
     GameScreen(){
@@ -85,6 +89,9 @@ public class GameScreen implements Screen {
         playerLaserTextureRegion = textureAtlas.findRegion("laserGreen05");
         enemyLaserTextureRegion = textureAtlas.findRegion("laserRed03");
 
+        //explosion texture
+        explosionTexture = new Texture("exp2_0.png");
+
         //set up game objects
         playerShip = new PlayerShip(WORLD_WIDTH/2, WORLD_HEIGHT/4,
                 10,10,
@@ -98,6 +105,8 @@ public class GameScreen implements Screen {
 
         playerLaserList = new LinkedList<>();
         enemyLaserList = new LinkedList<>();
+
+        explosionList = new LinkedList<>();
 
         batch = new SpriteBatch();
     }
@@ -123,7 +132,7 @@ public class GameScreen implements Screen {
         }
 
 
-        //enemy movement;
+        //enemy ships and movement;
         ListIterator<EnemyShip> enemyShipListIterator = enemyShipLists.listIterator();
         while (enemyShipListIterator.hasNext()) {
             EnemyShip enemyShip = enemyShipListIterator.next();
@@ -132,8 +141,6 @@ public class GameScreen implements Screen {
             enemyShip.draw(batch);
         }
 
-
-        //enemy ships
 
 
         //player ship
@@ -148,7 +155,8 @@ public class GameScreen implements Screen {
         detectCollision();
 
         //explosions
-        renderExplosions(delta);
+        updateRenderExplosions(delta);
+
 
         batch.end();
 
@@ -292,12 +300,17 @@ public class GameScreen implements Screen {
                 EnemyShip enemyShip = enemyShipListIterator.next();
 
                 if (enemyShip.intersects(laser.boundingBox)) {
+
+                    //calculate how many shield does the ship has, then if ship can be destroyed
+                    // reduce the number of shields if there are any
+                    if(enemyShip.hitAndCheckDestroyed(laser)){
+                        enemyShipListIterator.remove(); // removing the destroyed enemy ship
+                        explosionList.add(new Explosion(explosionTexture,
+                                new Rectangle(enemyShip.boundingBox), 0.7f));
+                    }
+
                     //remove laser
                     iterator.remove();
-                    //decrease number of shields
-                    if (enemyShip.shield > 0) {
-                        enemyShip.shield--;
-                    }
                     break;
 
                 }
@@ -310,19 +323,35 @@ public class GameScreen implements Screen {
         while ( iterator.hasNext()) {
             Laser laser = iterator.next();
             if (playerShip.intersects(laser.boundingBox)){
+                if ( playerShip.hitAndCheckDestroyed(laser)) {
+                    explosionList.add(
+                            new Explosion(explosionTexture,
+                                    new Rectangle(playerShip.boundingBox),
+                                    1.6f));
+                    playerShip.shield=5;
+
+                }
                 //remove laser
                 iterator.remove();
-                //decrease number of shields
-                if (playerShip.shield>0){
-                    playerShip.shield --;
-                }
             }
         }
-
-
     }
 
-    private void renderExplosions(float delta){
+
+
+    private void updateRenderExplosions(float delta){
+        ListIterator<Explosion> explosionListIterator = explosionList.listIterator();
+        while (explosionListIterator.hasNext()){
+            Explosion explosion = explosionListIterator.next();
+            explosion.update(delta);
+            if (explosion.isFinished()){
+                explosionListIterator.remove();
+            }
+            else{
+                explosion.draw(batch);
+            }
+
+        }
 
     }
 
@@ -351,15 +380,15 @@ public class GameScreen implements Screen {
 
     }
     private void renderLasers(float delta){
-        //playership lasers
+        //player ship lasers
         if (playerShip.canFireLaser()){
             Laser[] lasers = playerShip.fireLasers();
             for (Laser laser: lasers){
-                playerLaserList.add(laser);
+                playerLaserList.addAll(Arrays.asList(lasers));
             }
         }
 
-        //enemyship lasers
+        //enemy ship lasers
         ListIterator<EnemyShip> enemyShipListIterator = enemyShipLists.listIterator();
         while(enemyShipListIterator.hasNext()) {
             EnemyShip enemyShip = enemyShipListIterator.next();
@@ -367,7 +396,7 @@ public class GameScreen implements Screen {
             if (enemyShip.canFireLaser()) {
                 Laser[] lasers = enemyShip.fireLasers();
                 for (Laser laser : lasers) {
-                    enemyLaserList.add(laser);
+                    enemyLaserList.addAll(Arrays.asList(lasers));
                 }
             }
         }

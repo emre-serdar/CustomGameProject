@@ -57,6 +57,17 @@ public abstract class Ship {
         return boundingBox.overlaps(rectangle1);
     }
 
+
+    public boolean hitAndCheckDestroyed(Laser laser){
+        if (shield>0){
+            shield--;  //to decrease number of shield if any laser hits ships
+            return false; //since there are equal or more than 1 shield
+        }
+        return true; //ship does not have a shield, so it can be destroyed if laser fire hits
+
+    }
+
+
     //to avoid ships to fire lasers infinitely at the same time
     public boolean canFireLaser(){
         return (timeSinceLastShot-timeBetweenShots >= 0);
