@@ -18,7 +18,7 @@ public class EnemyShip extends Ship {
     public Laser[] fireLasers() {
         Laser[] laser = new Laser[1];
         //creating the laser
-        laser[0] = new Laser(xPosition+4.95f,yPosition+height*0.7f,laserWidth+0.5f,laserHeight,laserMovementSpeed,laserTextureRegion);
+        laser[0] = new Laser(boundingBox.x+4.95f,boundingBox.y,laserWidth+0.5f,laserHeight,laserMovementSpeed,laserTextureRegion);
 
         timeSinceLastShot = 0;
 
@@ -28,11 +28,11 @@ public class EnemyShip extends Ship {
     @Override
     public void draw(Batch batch) {
         //to draw ship
-        batch.draw(shipTextureRegion, xPosition, yPosition, width, height);
+        batch.draw(shipTextureRegion, boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
 
         //to draw shield
         if (shield > 0) { // if ship has at least 1 shield
-            batch.draw(shieldTextureRegion,xPosition,yPosition-0.8f,width,height);
+            batch.draw(shieldTextureRegion,boundingBox.x,boundingBox.y-0.8f,boundingBox.width,boundingBox.height);
         }
     }
 }

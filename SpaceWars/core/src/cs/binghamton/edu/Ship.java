@@ -11,8 +11,6 @@ public abstract class Ship {
     int shield;
 
     //position
-    float xPosition, yPosition; //lower left corner
-    float width, height;
     Rectangle boundingBox;
 
     //laser features
@@ -35,10 +33,7 @@ public abstract class Ship {
                 TextureRegion laserTextureRegion) {
         this.movementSpeed = movementSpeed;
         this.shield = shield;
-        this.xPosition = xCenter - width/2;
-        this.yPosition = yCenter - height/2;
-        this.width = width;
-        this.height = height;
+
         this.laserWidth = laserWidth;
         this.laserHeight = laserHeight;
         this.laserMovementSpeed = laserMovementSpeed;
@@ -46,14 +41,11 @@ public abstract class Ship {
         this.shipTextureRegion = shipTextureRegion;
         this.shieldTextureRegion = shieldTextureRegion;
         this.laserTextureRegion = laserTextureRegion;
-        this.boundingBox = new Rectangle(xPosition,yPosition,width,height);
+        this.boundingBox = new Rectangle(xCenter - width/2,yCenter - height/2,width,height);
     }
 
     // to update laser information of a ship
     public void update(float delta){
-        //location of laser fire
-        boundingBox.set(xPosition,yPosition,width,height);
-
         timeSinceLastShot += delta;
 
     }
@@ -72,11 +64,13 @@ public abstract class Ship {
 
     public void draw(Batch batch) {
         //to draw ship
-        batch.draw(shipTextureRegion, xPosition, yPosition, width, height);
+        batch.draw(shipTextureRegion, boundingBox.x, boundingBox.y,
+                    boundingBox.width, boundingBox.height);
 
         //to draw shield
         if (shield > 0) { // if ship has at least 1 shield
-            batch.draw(shieldTextureRegion,xPosition,yPosition,width,height);
+            batch.draw(shieldTextureRegion,boundingBox.x, boundingBox.y,
+                    boundingBox.width, boundingBox.height);
         }
     }
 
