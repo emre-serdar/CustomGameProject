@@ -2,6 +2,7 @@ package cs.binghamton.edu;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 
 public abstract class Ship {
 
@@ -12,6 +13,7 @@ public abstract class Ship {
     //position
     float xPosition, yPosition; //lower left corner
     float width, height;
+    Rectangle boundingBox;
 
     //laser features
     float laserWidth, laserHeight;
@@ -44,15 +46,24 @@ public abstract class Ship {
         this.shipTextureRegion = shipTextureRegion;
         this.shieldTextureRegion = shieldTextureRegion;
         this.laserTextureRegion = laserTextureRegion;
+        this.boundingBox = new Rectangle(xPosition,yPosition,width,height);
     }
 
     // to update laser information of a ship
     public void update(float delta){
+        //location of laser fire
+        boundingBox.set(xPosition,yPosition,width,height);
+
         timeSinceLastShot += delta;
 
     }
 
     public abstract Laser[] fireLasers();
+
+    //to find out if any laser intersects with fire lasers
+    public boolean intersects(Rectangle rectangle1){
+        return boundingBox.overlaps(rectangle1);
+    }
 
     //to avoid ships to fire lasers infinitely at the same time
     public boolean canFireLaser(){

@@ -124,6 +124,79 @@ public class GameScreen implements Screen {
 
 
         //create new lasers
+        renderLasers(delta);
+
+        //detect collisions between lasers and ships
+        detectCollision();
+
+        //explosions
+        renderExplosions(delta);
+
+        batch.end();
+    }
+
+    private void detectCollision(){
+        //for each player fire, if it intersects an enemy ship
+        ListIterator<Laser> iterator = playerLaserList.listIterator();
+        while ( iterator.hasNext()) {
+            Laser laser = iterator.next();
+            if (enemyShip.intersects(laser.getBoundingBox())){
+                //remove laser
+                iterator.remove();
+                //decrease number of shields
+                if (enemyShip.shield > 0){
+                    enemyShip.shield --;
+                }
+
+            }
+        }
+
+        //for enemy player fire, if it intersects a player ship
+        iterator = enemyLaserList.listIterator();
+        while ( iterator.hasNext()) {
+            Laser laser = iterator.next();
+            if (playerShip.intersects(laser.getBoundingBox())){
+                //remove laser
+                iterator.remove();
+                //decrease number of shields
+                if (playerShip.shield>0){
+                    playerShip.shield --;
+                }
+            }
+        }
+
+
+    }
+
+    private void renderExplosions(float delta){
+
+    }
+
+    private void renderBackground(float delta) {
+
+        //moving backgrounds with different speeds
+        backgroundOffsets[0] += delta * backgroundMaxScrollingSpeed /8 ;
+        backgroundOffsets[1] += delta * backgroundMaxScrollingSpeed /4 ;
+        backgroundOffsets[2] += delta * backgroundMaxScrollingSpeed /2 ;
+        backgroundOffsets[3] += delta * backgroundMaxScrollingSpeed;
+
+        //to avoid printing stuff which cannot be seen from the user
+        for (int layer=0; layer<backgroundOffsets.length; layer++){
+            if(backgroundOffsets[layer] > WORLD_HEIGHT){
+                backgroundOffsets[layer] = 0;
+            }
+            //drawing layer
+            batch.draw(backgrounds[layer],0,
+                    -backgroundOffsets[layer],
+                    WORLD_WIDTH,WORLD_HEIGHT);
+            batch.draw(backgrounds[layer],0,
+                    -backgroundOffsets[layer] + WORLD_HEIGHT,
+                    WORLD_WIDTH,WORLD_HEIGHT);
+
+        }
+
+    }
+    private void renderLasers(float delta){
         //playership lasers
         if (playerShip.canFireLaser()){
             Laser[] lasers = playerShip.fireLasers();
@@ -162,32 +235,6 @@ public class GameScreen implements Screen {
             if (laser.yPosition + laser.height <0 ){
                 iterator.remove();
             }
-        }
-
-        batch.end();
-    }
-
-    private void renderBackground(float delta) {
-
-        //moving backgrounds with different speeds
-        backgroundOffsets[0] += delta * backgroundMaxScrollingSpeed /8 ;
-        backgroundOffsets[1] += delta * backgroundMaxScrollingSpeed /4 ;
-        backgroundOffsets[2] += delta * backgroundMaxScrollingSpeed /2 ;
-        backgroundOffsets[3] += delta * backgroundMaxScrollingSpeed;
-
-        //to avoid printing stuff which cannot be seen from the user
-        for (int layer=0; layer<backgroundOffsets.length; layer++){
-            if(backgroundOffsets[layer] > WORLD_HEIGHT){
-                backgroundOffsets[layer] = 0;
-            }
-            //drawing layer
-            batch.draw(backgrounds[layer],0,
-                    -backgroundOffsets[layer],
-                    WORLD_WIDTH,WORLD_HEIGHT);
-            batch.draw(backgrounds[layer],0,
-                    -backgroundOffsets[layer] + WORLD_HEIGHT,
-                    WORLD_WIDTH,WORLD_HEIGHT);
-
         }
 
     }
