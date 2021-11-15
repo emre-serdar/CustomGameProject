@@ -6,11 +6,13 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -43,7 +45,7 @@ public class GameScreen implements Screen {
     //timing
     private float[] backgroundOffsets = {0,0,0,0}; // to move background with offset timer
     private float backgroundMaxScrollingSpeed;
-    private float timeForEnemySpawn = 3f; //3 seconds
+    private float timeForEnemySpawn = 2f; //2 seconds
     private float enemySpawnTimer = 0f;
 
     //world parameters
@@ -57,6 +59,14 @@ public class GameScreen implements Screen {
     private LinkedList<Laser> playerLaserList; // for lasers
     private LinkedList<Laser> enemyLaserList;
     private LinkedList<Explosion> explosionList;
+
+    private int kills = 0;
+
+
+    BitmapFont killFont;
+
+    BitmapFont myShieldFont;
+
 
     //GameScreen constructor
     GameScreen(){
@@ -96,20 +106,29 @@ public class GameScreen implements Screen {
         playerShip = new PlayerShip(WORLD_WIDTH/2, WORLD_HEIGHT/4,
                 10,10,
                 48,3,
-                0.4f, 4, 40, 0.5f,
+                0.4f, 4, 30, 0.5f,
                 playerShipTextureRegion, playerShieldTextureRegion, playerLaserTextureRegion);
 
         enemyShipLists = new LinkedList<>();
-
-
-
         playerLaserList = new LinkedList<>();
         enemyLaserList = new LinkedList<>();
-
         explosionList = new LinkedList<>();
 
+        //Fonts
+        killFont = new BitmapFont();
+        killFont.setColor(1,0,0,1);
+        killFont.getData().setScale(0.45f); // simply making fonts with smaller size
+        myShieldFont = new BitmapFont();
+        myShieldFont.setColor(0,0,1,1);
+        myShieldFont.getData().setScale(0.45f);
+
+
+
         batch = new SpriteBatch();
+
+
     }
+
 
 
     @Override
@@ -127,7 +146,9 @@ public class GameScreen implements Screen {
         //getting keyboard and touch input
         getInput(delta);
         playerShip.update(delta);
-        if(enemyShipLists.size()<3){
+
+        //cannot add more enemies if there are already 5
+        if(enemyShipLists.size()<7){
             spawnEnemyShips(delta);
         }
 
@@ -157,19 +178,29 @@ public class GameScreen implements Screen {
         //explosions
         updateRenderExplosions(delta);
 
+        //hud rendering
+        updateAndRenderHUD();
+
 
         batch.end();
 
+    }
+    private void updateAndRenderHUD(){
+        killFont.draw(batch, "Kills:"+kills, 12 ,125, 1, Align.left,false);
+        myShieldFont.draw(batch,"Shields:" + playerShip.shield, 35,125,1,Align.left,false);
     }
 
     private void spawnEnemyShips(float delta){
         enemySpawnTimer+=delta;
 
+        //to spawn enemies on different Location
+        float x = SpaceWars.random.nextFloat()*(WORLD_WIDTH+1);
+
         if (enemySpawnTimer > timeForEnemySpawn){
-            enemyShipLists.add(new EnemyShip(WORLD_WIDTH/2, WORLD_HEIGHT*3/4,
+            enemyShipLists.add(new EnemyShip(x, WORLD_HEIGHT*3/4,
                 10,10,
                 30,1,
-                0.4f, 4, 40, 0.8f,
+                0.4f, 4, 30, 0.8f,
                 enemyShipTextureRegion, enemyShieldTextureRegion, enemyLaserTextureRegion));
 
             enemySpawnTimer -= timeForEnemySpawn;
@@ -291,7 +322,7 @@ public class GameScreen implements Screen {
     }
 
     private void detectCollision(){
-        //for each player fire, if it intersects an enemy ship
+        //for each player laser fire, if it intersects an enemy ship
         ListIterator<Laser> iterator = playerLaserList.listIterator();
         while ( iterator.hasNext()) {
             Laser laser = iterator.next();
@@ -307,6 +338,7 @@ public class GameScreen implements Screen {
                         enemyShipListIterator.remove(); // removing the destroyed enemy ship
                         explosionList.add(new Explosion(explosionTexture,
                                 new Rectangle(enemyShip.boundingBox), 0.7f));
+                        kills ++;
                     }
 
                     //remove laser
@@ -328,7 +360,10 @@ public class GameScreen implements Screen {
                             new Explosion(explosionTexture,
                                     new Rectangle(playerShip.boundingBox),
                                     1.6f));
-                    playerShip.shield=5;
+                    if (playerShip.shield == 0){
+                        //game over, exit the game.
+                        Gdx.app.exit();
+                    }
 
                 }
                 //remove laser
