@@ -163,7 +163,6 @@ public class GameScreen implements Screen {
         }
 
 
-
         //player ship
 
         playerShip.draw(batch);
@@ -205,7 +204,6 @@ public class GameScreen implements Screen {
 
             enemySpawnTimer -= timeForEnemySpawn;
         }
-
 
     }
 
@@ -436,7 +434,7 @@ public class GameScreen implements Screen {
             }
         }
 
-        //draw lasers
+
 
         //remove old lasers
         ListIterator<Laser> iterator = playerLaserList.listIterator();
