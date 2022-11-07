@@ -1,2 +1,2 @@
 # CustomGameProject
-[embed]https://github.com/emre-serdar/CustomGameProject/blob/main/SpaceWars.pdf[/embed]
+<embed src="https://github.com/emre-serdar/CustomGameProject/blob/main/SpaceWars.pdf" type="application/pdf">
